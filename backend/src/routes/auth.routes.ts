@@ -2,7 +2,19 @@ import type { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify';
 import { authService } from '../services/auth.service';
 import { requestOtpSchema, verifyOtpSchema } from '../schemas/auth.schema';
 import { authMiddleware } from '../middleware/auth';
-import { authRateLimit, resetAuthAttempts } from '../middleware/security';
+import {
+  authRateLimit,
+  resetAuthAttempts,
+  otpRequestRateLimit,
+  otpVerifyRateLimit,
+  resetOtpVerifyAttempts,
+} from '../middleware/security';
+
+function tooManyAttempts(reply: FastifyReply, retryAfterSeconds: number) {
+  return reply.code(429).header('Retry-After', String(retryAfterSeconds)).send({
+    error: 'Too many attempts. Please try again later.',
+  });
+}
 
 export async function authRoutes(app: FastifyInstance): Promise<void> {
   app.post('/auth/request-otp', async (request: FastifyRequest, reply: FastifyReply) => {
@@ -16,6 +28,11 @@ export async function authRoutes(app: FastifyInstance): Promise<void> {
     const parsed = requestOtpSchema.safeParse(request.body);
     if (!parsed.success) {
       return reply.code(400).send({ error: parsed.error.flatten() });
+    }
+
+    const emailCheck = otpRequestRateLimit(parsed.data.email);
+    if (!emailCheck.allowed) {
+      return tooManyAttempts(reply, emailCheck.retryAfterSeconds);
     }
 
     try {
@@ -40,12 +57,18 @@ export async function authRoutes(app: FastifyInstance): Promise<void> {
       return reply.code(400).send({ error: parsed.error.flatten() });
     }
 
+    const emailCheck = otpVerifyRateLimit(parsed.data.email);
+    if (!emailCheck.allowed) {
+      return tooManyAttempts(reply, emailCheck.retryAfterSeconds);
+    }
+
     try {
       const result = await authService.verifyOtp(parsed.data.email, parsed.data.code, parsed.data.name);
       if (!result) {
         return reply.code(401).send({ error: 'Invalid or expired OTP' });
       }
       resetAuthAttempts(request.ip);
+      resetOtpVerifyAttempts(parsed.data.email);
       return reply.code(200).send({
         token: result.token,
         user: {

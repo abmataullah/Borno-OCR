@@ -13,7 +13,7 @@ import { settingsRoutes } from './routes/settings.routes';
 import { ticketRoutes, adminTicketRoutes } from './routes/ticket.routes';
 import { config } from './config/env';
 import { startScheduler, stopScheduler } from './services/scheduler.service';
-import { securityHeadersMiddleware } from './middleware/security';
+import { securityHeadersMiddleware, FRAME_ANCESTORS } from './middleware/security';
 
 const isProd = config.nodeEnv === 'production';
 const collaboraOrigins = isProd ? [] : ['http://localhost:9980', 'ws://localhost:9980'];
@@ -30,7 +30,7 @@ export async function buildApp(app: FastifyInstance): Promise<void> {
         objectSrc: ["'none'"],
         baseUri: ["'self'"],
         formAction: ["'self'"],
-        frameAncestors: ["'none'"],
+        frameAncestors: FRAME_ANCESTORS,
         frameSrc: ["'self'", ...collaboraOrigins.filter((o) => o.startsWith('http'))],
         connectSrc: ["'self'", ...collaboraOrigins],
         upgradeInsecureRequests: isProd ? [] : null,

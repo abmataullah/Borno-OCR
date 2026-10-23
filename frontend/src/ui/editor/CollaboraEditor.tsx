@@ -56,7 +56,7 @@ export function CollaboraEditor() {
         throw new Error('Collabora discovery did not return an editor URL for DOCX');
       }
       const wopiSrc = encodeURIComponent(`${WOPI_HOST}/wopi/files/${session.fileId}`);
-      const accessToken = encodeURIComponent(session.fileId);
+      const accessToken = encodeURIComponent(session.accessToken);
       const editorUrl = `${status.editorUrl}WOPISrc=${wopiSrc}&access_token=${accessToken}&title=${encodeURIComponent(filename)}&closebutton=1&revisionhistory=0`;
 
       setIframeSrc(editorUrl);
@@ -115,9 +115,7 @@ export function CollaboraEditor() {
     if (!wopiFileId || !project) return;
     setState('saving');
     try {
-      const downloadUrl = api.wopi.downloadEdited(wopiFileId);
-      const res = await fetch(downloadUrl);
-      const blob = await res.blob();
+      const blob = await api.wopi.downloadEdited(wopiFileId);
       const file = new File([blob], 'edited.docx', { type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' });
       const imported = await importDocx(file);
       if (imported.pages && imported.pages.length > 0) {

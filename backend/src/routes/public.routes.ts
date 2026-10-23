@@ -1,6 +1,7 @@
 import type { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify';
 import { projectService } from '../services/project.service';
 import { getStorage } from '../services/storage.service';
+import { contentDisposition } from '../utils/content-disposition';
 
 export async function publicRoutes(app: FastifyInstance): Promise<void> {
   app.get('/public/projects/:shareToken', async (request: FastifyRequest, reply: FastifyReply) => {
@@ -32,7 +33,7 @@ export async function publicRoutes(app: FastifyInstance): Promise<void> {
     return reply
       .code(200)
       .header('Content-Type', 'application/pdf')
-      .header('Content-Disposition', `attachment; filename="${project.name}.pdf"`)
+      .header('Content-Disposition', contentDisposition(`${project.name}.pdf`))
       .send(buffer);
   });
 }

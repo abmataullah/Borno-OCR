@@ -11,6 +11,13 @@ export class AuthService {
     const code = generateOtp(config.otpLength);
     const expiresAt = getOtpExpiry(config.otpExpiryMinutes);
 
+    // SECURITY: only the newest code is valid — expire any earlier pending
+    // codes so guesses can't match one of several live codes.
+    await db
+      .update(schema.otpCodes)
+      .set({ status: 'expired' })
+      .where(and(eq(schema.otpCodes.email, email), eq(schema.otpCodes.status, 'pending')));
+
     await db.insert(schema.otpCodes).values({
       email,
       code,
@@ -44,8 +51,6 @@ export class AuthService {
     const now = Date.now();
     const isExpired = now > expiresAt.getTime();
 
-    console.log(`[OTP Verify] email=${email}, code=${code}, expiresAt=${expiresAt.toISOString()}, now=${new Date(now).toISOString()}, isExpired=${isExpired}`);
-
     if (isExpired) {
       await db
         .update(schema.otpCodes)
@@ -64,7 +69,7 @@ export class AuthService {
     return { token, user };
   }
 
-  private async findOrCreateUser(email: string, name?: string): Promise<User> {
+  async findOrCreateUser(email: string, name?: string): Promise<User> {
     const existing = await db
       .select()
       .from(schema.users)
@@ -81,9 +86,19 @@ export class AuthService {
         email,
         name: name ?? email.split('@')[0],
       })
+      .onConflictDoNothing({ target: schema.users.email })
       .returning();
 
-    return newUser;
+    if (newUser) return newUser;
+
+    // Another request created the user concurrently (embed mode can fire
+    // several authenticated requests at once on first visit).
+    const [created] = await db
+      .select()
+      .from(schema.users)
+      .where(eq(schema.users.email, email))
+      .limit(1);
+    return created;
   }
 
   async getUserById(userId: string): Promise<User | null> {

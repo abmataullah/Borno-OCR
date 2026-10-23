@@ -40,12 +40,17 @@ export async function authMiddleware(request: FastifyRequest, reply: FastifyRepl
 
   // 2. Fallback: try Banglai Cloud embed token (embed mode).
   // The embed token is HMAC-signed by Banglai Cloud and carries user identity +
-  // plan. We trust it without a BornoOCR DB lookup — Banglai Cloud has already
-  // authenticated the user via NextAuth and verified the subscription.
+  // plan. Banglai Cloud has already authenticated the user via NextAuth and
+  // verified the subscription, so the plan comes from the token.
+  // SECURITY: the Banglai `uid` is never used as a BornoOCR user ID — it lives
+  // in a different ID space and could collide with a local user's ID. The
+  // embed user is mapped to (or provisioned as) the local account with the
+  // same email instead.
   const embedPayload = verifyEmbedToken(token);
   if (embedPayload) {
+    const localUser = await authService.findOrCreateUser(embedPayload.email, embedPayload.name || undefined);
     request.user = {
-      userId: embedPayload.uid,
+      userId: localUser.id,
       email: embedPayload.email,
       plan: embedPayload.plan,
     };

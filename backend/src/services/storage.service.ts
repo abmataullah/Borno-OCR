@@ -1,6 +1,22 @@
 import { promises as fs } from 'fs';
-import { join } from 'path';
+import { join, resolve, sep } from 'path';
 import { config } from '../config/env';
+
+/**
+ * SECURITY: map a storage key to a path inside `basePath`. Rejects absolute
+ * keys and anything that resolves outside the storage root (e.g. `../.env`).
+ */
+export function resolveStorageKey(basePath: string, key: string): string {
+  const root = resolve(basePath);
+  if (!key || key.includes('\0') || /^([a-zA-Z]:)?[\\/]/.test(key)) {
+    throw new Error('Invalid storage key');
+  }
+  const full = resolve(root, key);
+  if (!full.startsWith(root + sep)) {
+    throw new Error('Invalid storage key');
+  }
+  return full;
+}
 
 export interface StorageAdapter {
   upload(key: string, data: Buffer, contentType: string): Promise<void>;
@@ -17,7 +33,7 @@ class LocalStorageAdapter implements StorageAdapter {
   }
 
   private fullPath(key: string): string {
-    return join(this.basePath, key);
+    return resolveStorageKey(this.basePath, key);
   }
 
   async upload(key: string, data: Buffer, _contentType: string): Promise<void> {

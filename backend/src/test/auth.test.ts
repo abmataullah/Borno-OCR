@@ -21,7 +21,7 @@ vi.mock('../db', () => ({
       })),
     })),
   },
-  schema: {},
+  schema: { otpCodes: {}, users: {} },
 }));
 
 vi.mock('../services/email.service', () => ({

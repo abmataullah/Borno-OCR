@@ -5,6 +5,7 @@ import { getStorage } from '../services/storage.service';
 import { createProjectSchema, updateProjectSchema, shareProjectSchema } from '../schemas/project.schema';
 import { authMiddleware } from '../middleware/auth';
 import { validateFileSignature, validateFileSize } from '../middleware/security';
+import { contentDisposition } from '../utils/content-disposition';
 
 export async function projectRoutes(app: FastifyInstance): Promise<void> {
   app.addHook('preHandler', authMiddleware);
@@ -175,12 +176,25 @@ export async function projectRoutes(app: FastifyInstance): Promise<void> {
     return reply
       .code(200)
       .header('Content-Type', 'application/pdf')
-      .header('Content-Disposition', `attachment; filename="${project.name}.pdf"`)
+      .header('Content-Disposition', contentDisposition(`${project.name}.pdf`))
       .send(buffer);
   });
 
   app.get('/files/*', async (request: FastifyRequest, reply: FastifyReply) => {
     const key = (request.params as { '*': string })['*'];
+
+    // SECURITY: only serve files under a project the caller owns. Keys look
+    // like `projects/<projectId>/<file>`; anything else (including `..`
+    // segments) is rejected before touching storage.
+    const match = /^projects\/([0-9a-f-]{36})\/([A-Za-z0-9._-]+)$/i.exec(key);
+    if (!match || match[2].startsWith('.')) {
+      return reply.code(404).send({ error: 'File not found' });
+    }
+    const project = await projectService.getById(request.user!.userId, match[1]);
+    if (!project) {
+      return reply.code(404).send({ error: 'File not found' });
+    }
+
     const storage = getStorage();
     try {
       const buffer = await storage.download(key);

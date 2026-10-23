@@ -402,12 +402,19 @@ export const api = {
     createSession: (file: Blob, filename: string) => {
       const formData = new FormData();
       formData.append('file', file, filename);
-      return request<{ fileId: string; filename: string }>('/wopi/create', {
+      return request<{ fileId: string; filename: string; accessToken: string }>('/wopi/create', {
         method: 'POST',
         body: formData,
       });
     },
-    downloadEdited: (fileId: string) => `${API_BASE}/wopi/${fileId}/download`,
+    downloadEdited: async (fileId: string): Promise<Blob> => {
+      const token = getToken();
+      const res = await fetch(`${API_BASE}/wopi/${fileId}/download`, {
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+      });
+      if (!res.ok) throw new Error(`Download failed (${res.status})`);
+      return res.blob();
+    },
   },
 
   ocr: {

@@ -44,11 +44,16 @@ export function detectXss(input: string): boolean {
   return XSS_PATTERNS.some((pattern) => pattern.test(input));
 }
 
+/**
+ * Who may embed BornoOCR in an iframe: itself and Banglai Cloud (the
+ * HomeMade Software integration). Used as CSP frame-ancestors.
+ */
+export const FRAME_ANCESTORS = ["'self'", 'https://banglai.cloud', 'https://*.banglai.cloud'];
+
 export async function securityHeadersMiddleware(request: FastifyRequest, reply: FastifyReply): Promise<void> {
   reply.header('X-Content-Type-Options', 'nosniff');
-  // Allow embedding inside Banglai Cloud iframe (for the HomeMade Software integration).
-  // Use CSP frame-ancestors instead of X-Frame-Options for modern browser support.
-  reply.header('Content-Security-Policy', "frame-ancestors https://banglai.cloud https://*.banglai.cloud;");
+  // NOTE: Content-Security-Policy is set by @fastify/helmet in app.ts (with
+  // FRAME_ANCESTORS). Setting it here too would overwrite helmet's full policy.
   reply.header('Referrer-Policy', 'strict-origin-when-cross-origin');
   reply.header('Permissions-Policy', 'geolocation=(), microphone=(), camera=()');
 }
@@ -186,11 +191,61 @@ export function resetAuthAttempts(ip: string): void {
   authAttempts.delete(ip);
 }
 
+/**
+ * SECURITY: per-email limits, so OTP codes can't be guessed (or OTP emails
+ * spammed) by rotating IPs. 5 code requests and 5 verify attempts per email
+ * per 15 minutes. A successful verify clears the verify counter.
+ */
+const otpRequestsByEmail = new Map<string, { count: number; resetTime: number }>();
+const otpVerifiesByEmail = new Map<string, { count: number; resetTime: number }>();
+
+function emailLimit(
+  store: Map<string, { count: number; resetTime: number }>,
+  email: string,
+): { allowed: boolean; retryAfterSeconds: number } {
+  const key = email.trim().toLowerCase();
+  const now = Date.now();
+  const entry = store.get(key);
+
+  if (!entry || now > entry.resetTime) {
+    store.set(key, { count: 1, resetTime: now + AUTH_WINDOW });
+    return { allowed: true, retryAfterSeconds: 0 };
+  }
+
+  entry.count++;
+  if (entry.count > AUTH_LIMIT) {
+    return { allowed: false, retryAfterSeconds: Math.ceil((entry.resetTime - now) / 1000) };
+  }
+
+  return { allowed: true, retryAfterSeconds: 0 };
+}
+
+export function otpRequestRateLimit(email: string): { allowed: boolean; retryAfterSeconds: number } {
+  return emailLimit(otpRequestsByEmail, email);
+}
+
+export function otpVerifyRateLimit(email: string): { allowed: boolean; retryAfterSeconds: number } {
+  return emailLimit(otpVerifiesByEmail, email);
+}
+
+export function resetOtpVerifyAttempts(email: string): void {
+  otpVerifiesByEmail.delete(email.trim().toLowerCase());
+}
+
+/** Test helper: clear every in-memory auth limiter. */
+export function clearAuthRateLimits(): void {
+  authAttempts.clear();
+  otpRequestsByEmail.clear();
+  otpVerifiesByEmail.clear();
+}
+
 setInterval(() => {
   const now = Date.now();
-  for (const [ip, entry] of authAttempts.entries()) {
-    if (now > entry.resetTime) {
-      authAttempts.delete(ip);
+  for (const store of [authAttempts, otpRequestsByEmail, otpVerifiesByEmail]) {
+    for (const [key, entry] of store.entries()) {
+      if (now > entry.resetTime) {
+        store.delete(key);
+      }
     }
   }
-}, 60 * 1000);
+}, 60 * 1000).unref();
