@@ -1,0 +1,41 @@
+# DocFlow — robots.txt
+# Allow all major search engines and AI crawlers
+
+User-agent: *
+Allow: /
+Disallow: /dashboard
+Disallow: /editor
+Disallow: /admin
+Disallow: /auth
+Disallow: /api/
+Disallow: /share/
+
+# AI answer-engine crawlers (AEO/GEO) — explicitly allowed on public pages
+User-agent: GPTBot
+Allow: /
+Disallow: /dashboard
+Disallow: /editor
+Disallow: /admin
+Disallow: /api/
+
+User-agent: ChatGPT-User
+Allow: /
+
+User-agent: ClaudeBot
+Allow: /
+Disallow: /dashboard
+Disallow: /editor
+Disallow: /admin
+Disallow: /api/
+
+User-agent: PerplexityBot
+Allow: /
+Disallow: /api/
+
+User-agent: Google-Extended
+Allow: /
+
+User-agent: Bingbot
+Allow: /
+
+Sitemap: https://docflow.app/sitemap.xml

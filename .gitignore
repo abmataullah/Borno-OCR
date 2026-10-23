@@ -1,0 +1,52 @@
+# Dependencies
+node_modules/
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# Build outputs
+dist/
+build/
+*.tsbuildinfo
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Docker
+docker-compose.override.yml
+
+# Storage (local dev)
+storage/
+
+# Test artifacts
+coverage/
+test-results/
+playwright-report/
+
+# Fonts (downloaded separately)
+frontend/public/fonts/*.ttf
+frontend/public/fonts/*.otf
+
+# Large files
+*.pdf
+!tests/fixtures/*.pdf
+
+# Bangla fonts for LibreOffice worker (many are commercial — not redistributable)
+libreoffice-worker/fonts/*.ttf
+libreoffice-worker/fonts/*.otf
+
+# Python test cache
+.pytest_cache/

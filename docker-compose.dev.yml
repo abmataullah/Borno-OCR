@@ -1,0 +1,55 @@
+version: '3.9'
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: docflow
+      POSTGRES_PASSWORD: docflow
+      POSTGRES_DB: docflow
+    ports:
+      - '5432:5432'
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U docflow']
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - '6379:6379'
+    volumes:
+      - redisdata:/data
+    healthcheck:
+      test: ['CMD', 'redis-cli', 'ping']
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  collabora:
+    build:
+      context: ./collabora
+      dockerfile: Dockerfile
+    image: docflow-collabora:latest
+    container_name: docflow-collabora
+    extra_hosts:
+      - 'host.docker.internal:192.168.65.254'
+    environment:
+      - aliasgroup1=http://host.docker.internal:3001
+      - extra_params=--o:ssl.enable=false --o:ssl.termination=false
+      - username=admin
+      - password=admin
+    ports:
+      - '9980:9980'
+    healthcheck:
+      test: ['CMD', 'curl', '-f', 'http://localhost:9980/hosting/discovery']
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  pgdata:
+  redisdata:

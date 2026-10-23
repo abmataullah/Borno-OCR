@@ -1,0 +1,36 @@
+[project]
+name = "docflow-worker"
+version = "0.1.0"
+description = "DocFlow Python worker — PDF text extraction, table detection, OCR"
+requires-python = ">=3.11"
+license = { text = "MIT" }
+
+dependencies = [
+    "fastapi>=0.111.0",
+    "uvicorn[standard]>=0.30.0",
+    "redis>=5.0.0",
+    "bullmq>=0.2.0",
+    "httpx>=0.27.0",
+    "pdfplumber>=0.11.0",
+    "camelot-py[cv]>=0.11.0",
+    "pytesseract>=0.3.10",
+    "Pillow>=10.3.0",
+    "pdf2image>=1.17.0",
+    "python-multipart>=0.0.9",
+    "pydantic>=2.7.0",
+    # High-accuracy OCR engines
+    "paddleocr>=2.7.0",
+    "paddlepaddle>=2.6.0",
+    "surya-ocr>=0.6.0",
+    "opencv-python-headless>=4.10.0",
+    "numpy>=1.26.0",
+    "pyzbar>=0.1.9",
+    "beautifulsoup4>=4.12.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.2.0",
+    "pytest-asyncio>=0.23.0",
+    "httpx>=0.27.0",
+]

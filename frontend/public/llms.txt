@@ -1,0 +1,35 @@
+# DocFlow
+
+> DocFlow is a browser-based PDF editor that lets users edit PDFs like Word documents and Excel spreadsheets. It features high-accuracy Bangla (Bengali) and English OCR, automatic table detection, scanned document conversion, form field extraction, and document analysis. Free plan runs OCR entirely in-browser for privacy; paid plans add server-side hybrid OCR (PaddleOCR + Surya) for higher accuracy.
+
+## What DocFlow does
+
+- **Edit PDF text like Word**: Converts PDF pages into editable text blocks with preserved fonts, alignment, and layout. Users can type, delete, and reformat text directly.
+- **Edit PDF tables like Excel**: Automatically detects tables (including in scanned documents) and converts them into editable spreadsheet-style tables with merged cell and header support.
+- **Bangla OCR**: High-accuracy Bengali script OCR with automatic post-correction for common character confusions (ত/থ, শ/ষ/স, ড/ঢ), digit normalization, and dictionary-based spell fixing. Also supports English, Hindi, Sinhala, Tamil, and Arabic.
+- **Scanned PDF conversion**: Uses hybrid OCR routing — PaddleOCR PP-Structure for table/form pages, Surya OCR for text-heavy pages, Tesseract fallback.
+- **Document analysis**: Detects document type (invoice, receipt, form, letter, certificate, ID card), extracts key-value fields (names, dates, amounts, invoice numbers — in English and Bangla), detects checkboxes with state, reads barcodes/QR codes, and grades OCR quality per page (A+ to F).
+- **Export**: PDF and Word (DOCX) export with layout preservation.
+- **Collaboration**: Real-time shared editing of projects.
+
+## Pricing
+
+- Free plan: in-browser OCR editing, unlimited local processing, privacy-first (files never leave the device).
+- Paid plans: server-side high-accuracy OCR, document analysis reports, form field extraction, priority processing.
+
+## Key pages
+
+- [Home](https://docflow.app/): Product overview and features
+- [Pricing](https://docflow.app/pricing): Plan comparison
+- [Help](https://docflow.app/help): User guides and FAQ
+
+## Common questions
+
+Q: Can DocFlow edit scanned PDFs in Bangla?
+A: Yes — this is DocFlow's specialty. It combines hybrid OCR engines with Bangla-specific post-correction to achieve roughly 95% accuracy on scanned Bangla documents.
+
+Q: Does the free plan upload my files to a server?
+A: No. Free-plan OCR runs entirely in the browser using Tesseract.js. Files never leave the user's device.
+
+Q: Can DocFlow extract tables from PDFs?
+A: Yes. It detects tables automatically — even borderless and scanned tables — and converts them to editable spreadsheet-style tables, exportable to DOCX.

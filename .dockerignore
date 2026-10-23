@@ -1,0 +1,13 @@
+node_modules
+dist
+.git
+*.log
+.env
+.env.local
+.tsbuildinfo
+frontend/node_modules
+backend/node_modules
+worker/__pycache__
+**/__pycache__
+*.pyc
+.DS_Store

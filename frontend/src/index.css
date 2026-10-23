@@ -1,0 +1,153 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import url('/fonts/bengali-fonts.css');
+
+@layer base {
+  * {
+    @apply border-app-border;
+  }
+
+  body {
+    @apply bg-app-bg text-text-primary font-sans;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  ::selection {
+    @apply bg-gold/30;
+  }
+
+  /* Scrollbar styling */
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+
+  ::-webkit-scrollbar-track {
+    @apply bg-app-panel;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    @apply bg-app-border rounded-full;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    @apply bg-text-tertiary;
+  }
+}
+
+@layer components {
+  .btn-gold {
+    @apply bg-gold text-text-on-gold font-semibold rounded-4 px-4 py-2 text-sm
+           hover:bg-gold-hover active:bg-gold-active transition-colors;
+  }
+
+  .btn-ghost {
+    @apply bg-app-elevated text-text-primary font-medium rounded-4 px-4 py-2 text-sm
+           border border-app-border hover:bg-app-hover transition-colors;
+  }
+
+  .btn-outline-gold {
+    @apply bg-app-elevated text-gold font-medium rounded-4 px-4 py-2 text-sm
+           border border-gold hover:bg-app-hover transition-colors;
+  }
+
+  .panel {
+    @apply bg-app-panel border border-app-border;
+  }
+
+  .input-field {
+    @apply bg-app-elevated border border-app-border rounded-4 px-3 py-2 text-sm
+           text-text-primary placeholder:text-text-tertiary
+           focus:outline-none focus:border-gold transition-colors;
+  }
+
+  .icon-btn {
+    @apply flex items-center justify-center w-8 h-8 rounded-4
+           text-text-secondary hover:text-text-primary hover:bg-app-hover
+           transition-colors cursor-pointer;
+  }
+
+  .icon-btn-active {
+    @apply flex items-center justify-center w-8 h-8 rounded-4
+           text-gold bg-gold-muted transition-colors cursor-pointer;
+  }
+
+  /* Premium design system additions */
+  .glass {
+    @apply bg-white/[0.03] backdrop-blur-xl border border-white/[0.08];
+  }
+
+  .glass-gold {
+    @apply bg-gradient-to-br from-gold/10 via-gold/5 to-transparent
+           backdrop-blur-xl border border-gold/20;
+  }
+
+  .btn-gold-3d {
+    @apply relative inline-flex items-center justify-center gap-2
+           px-6 py-3 rounded-12 font-semibold text-text-on-gold
+           bg-gold-shine bg-[length:200%_100%]
+           shadow-gold-glow hover:shadow-gold-glow-lg
+           transform transition-all duration-300 ease-out
+           hover:-translate-y-0.5 active:translate-y-0
+           animate-gradient-x;
+  }
+
+  .btn-glass {
+    @apply relative inline-flex items-center justify-center gap-2
+           px-6 py-3 rounded-12 font-semibold text-text-primary
+           bg-white/[0.04] backdrop-blur-xl border border-white/10
+           hover:bg-white/[0.08] hover:border-gold/30
+           transform transition-all duration-300
+           hover:-translate-y-0.5;
+  }
+
+  .card-3d {
+    @apply relative bg-app-panel/60 backdrop-blur-xl border border-white/[0.06]
+           rounded-16 p-6 transition-all duration-500
+           hover:border-gold/30 hover:-translate-y-1
+           hover:shadow-[0_20px_60px_-15px_rgba(212,175,55,0.25)];
+  }
+
+  .text-gradient-gold {
+    @apply bg-gradient-to-r from-gold via-yellow-300 to-gold
+           bg-clip-text text-transparent
+           bg-[length:200%_100%] animate-gradient-x;
+  }
+
+  .text-shimmer {
+    background: linear-gradient(110deg, #fafafa 0%, #d4af37 30%, #fafafa 60%);
+    background-size: 200% 100%;
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    animation: shimmer 3s linear infinite;
+  }
+
+  .perspective-1000 {
+    perspective: 1000px;
+  }
+
+  .preserve-3d {
+    transform-style: preserve-3d;
+  }
+
+  .grid-bg {
+    background-image:
+      linear-gradient(rgba(212, 175, 55, 0.05) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(212, 175, 55, 0.05) 1px, transparent 1px);
+    background-size: 50px 50px;
+  }
+
+  .noise-bg::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' /%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.4'/%3E%3C/svg%3E");
+    opacity: 0.03;
+    pointer-events: none;
+    mix-blend-mode: overlay;
+  }
+}
