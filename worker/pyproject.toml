@@ -21,7 +21,7 @@ dependencies = [
     # High-accuracy OCR engines
     "paddleocr>=2.7.0",
     "paddlepaddle>=2.6.0",
-    "surya-ocr>=0.6.0",
+    "surya-ocr==0.4.15",
     "opencv-python-headless>=4.10.0",
     "numpy>=1.26.0",
     "pyzbar>=0.1.9",

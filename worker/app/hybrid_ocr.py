@@ -81,7 +81,7 @@ def _load_engines() -> None:
     # Try loading Surya OCR
     try:
         from surya.ocr import run_ocr
-        from surya.layout import run_layout
+        from surya.layout import batch_layout_detection as run_layout
 
         _surya_ocr = run_ocr
         _surya_layout = run_layout
