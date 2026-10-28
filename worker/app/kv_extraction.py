@@ -13,6 +13,7 @@ Detects:
 
 import logging
 import re
+from PIL import Image
 from typing import Any
 
 logger = logging.getLogger(__name__)

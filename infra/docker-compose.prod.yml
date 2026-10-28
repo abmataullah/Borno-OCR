@@ -58,6 +58,7 @@ services:
       - SSL_STORE_PASSWD=${SSL_STORE_PASSWD:-}
       - BACKEND_URL=http://backend:3001
       - UNOSERVER_URL=http://libreoffice:2003
+      - BORNOOCR_EMBED_SECRET=${BORNOOCR_EMBED_SECRET}
     volumes:
       - uploads:/data/uploads
     depends_on:
@@ -92,8 +93,27 @@ services:
     build:
       context: ..
       dockerfile: infra/frontend.Dockerfile
-    ports:
-      - '80:80'
+    expose:
+      - '80'
+    networks:
+      - default
+      - coolify
+    labels:
+      - traefik.enable=true
+      - traefik.docker.network=coolify
+      - traefik.http.routers.https-bornoocr.entryPoints=https
+      - traefik.http.routers.https-bornoocr.middlewares=gzip-sse
+      - 'traefik.http.routers.https-bornoocr.rule=Host(`pdf.shomoy.io`)'
+      - traefik.http.routers.https-bornoocr.tls.certresolver=letsencrypt
+      - traefik.http.routers.https-bornoocr.tls=true
+      - traefik.http.routers.https-bornoocr.priority=100
+      - traefik.http.routers.https-bornoocr.service=https-bornoocr
+      - traefik.http.services.https-bornoocr.loadbalancer.server.port=80
+      - traefik.http.routers.http-bornoocr.entryPoints=http
+      - traefik.http.routers.http-bornoocr.middlewares=redirect-to-https
+      - 'traefik.http.routers.http-bornoocr.rule=Host(`pdf.shomoy.io`)'
+      - traefik.http.routers.http-bornoocr.service=https-bornoocr
+      - traefik.http.routers.http-bornoocr.priority=100
     depends_on:
       - backend
     restart: unless-stopped
@@ -102,3 +122,7 @@ volumes:
   pgdata:
   redisdata:
   uploads:
+
+networks:
+  coolify:
+    external: true
